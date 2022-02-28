@@ -31,6 +31,10 @@ mingw/stdio.h
 *.lib
 *.dll
 
+# build artifacts
+
+*.stamp
+
 # generator68k specific intermediate files
 
 cpu68k-?.c
