@@ -17,7 +17,7 @@ def68k.stamp: def68k$(EXEEXT) def68k.def
 
 def68k-proto.h def68k-funcs.h def68k-iibs.h : def68k.stamp
 
-cpu68k.c gen68k.c : def68k-proto.h def68k-funcs.h def68k-iibs.h
+cpu68k.o gen68k.o : def68k-proto.h def68k-funcs.h def68k-iibs.h
 
 ## stage two - create cpu C files and create library
 
