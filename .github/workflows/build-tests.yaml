@@ -23,33 +23,6 @@ jobs:
       - name: Build
         run: ./.github/scripts/build.sh
 
-  wincross:
-    name: "Windows cross-compiled Linux/MinGW"
-    runs-on: ubuntu-latest
-    env:
-      BUILD_PARAMS: "--host=x86_64-w64-mingw32 --enable-mingw"
-      PREFIX: "/tmp/build/mingw"
-      PKGDATADIR: "$PREFIX/share"
-      WINDEPS: "/tmp/deps"
-      SDL: "https://www.libsdl.org/release/SDL2-devel-2.0.8-mingw.tar.gz"
-      GLEW: "https://downloads.sourceforge.net/project/glew/glew/2.1.0/glew-2.1.0-win32.zip"
-      NSIS_SDL2: "http://libsdl.org/release/SDL2-2.0.10-win32-x64.zip"
-      NSIS_GLEW: "http://downloads.sourceforge.net/project/glew/glew/2.1.0/glew-2.1.0-win32.zip"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Dependencies
-        run: |
-          sudo add-apt-repository -y ppa:dciabrin/ngdevkit
-          sudo apt-get update -y
-          sudo apt-get install -y emudbg-dev autoconf-archive libsdl2-dev libglew-dev
-          sudo apt-get install mingw-w64 libz-mingw-w64-dev emudbg-mingw-w64-dev nsis
-
-      - name: Build
-        run: |
-          ./.github/scripts/build-mingw.sh
-
   win:
     name: "Windows native MSYS2 build"
     runs-on: windows-latest
@@ -65,19 +38,19 @@ jobs:
       - name: Install MSYS2
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: UCRT64
           update: true
           install:
             git autoconf autoconf-archive automake make
-            mingw-w64-x86_64-gcc mingw-w64-x86_64-libtool
-            mingw-w64-x86_64-pkgconf mingw-w64-x86_64-SDL2
-            mingw-w64-x86_64-glew
+            mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-libtool
+            mingw-w64-ucrt-x86_64-pkgconf mingw-w64-ucrt-x86_64-SDL2
+            mingw-w64-ucrt-x86_64-glew
 
       - name: Install ngdevkit dependencies
         run: |
           echo -e "[ngdevkit]\nSigLevel = Optional TrustAll\nServer = https://dciabrin.net/msys2-ngdevkit/\$arch" >> /etc/pacman.conf
           pacman -Sy
-          pacman -S --noconfirm mingw-w64-x86_64-emudbg
+          pacman -S --noconfirm mingw-w64-ucrt-x86_64-emudbg
 
       - name: Build
         run: ./.github/scripts/build-msys2.sh

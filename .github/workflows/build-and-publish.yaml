@@ -23,42 +23,6 @@ jobs:
       - name: Build
         run: ./.github/scripts/build.sh
 
-  wincross:
-    name: "Windows cross-compiled Linux/MinGW"
-    runs-on: ubuntu-latest
-    env:
-      BUILD_PARAMS: "--host=x86_64-w64-mingw32 --enable-mingw"
-      PREFIX: "/tmp/build/mingw"
-      PKGDATADIR: "$PREFIX/share"
-      WINDEPS: "/tmp/deps"
-      SDL: "https://www.libsdl.org/release/SDL2-devel-2.0.8-mingw.tar.gz"
-      GLEW: "https://downloads.sourceforge.net/project/glew/glew/2.1.0/glew-2.1.0-win32.zip"
-      NSIS_SDL2: "http://libsdl.org/release/SDL2-2.0.10-win32-x64.zip"
-      NSIS_GLEW: "http://downloads.sourceforge.net/project/glew/glew/2.1.0/glew-2.1.0-win32.zip"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Dependencies
-        run: |
-          sudo add-apt-repository -y ppa:dciabrin/ngdevkit
-          sudo apt-get update -y
-          sudo apt-get install -y emudbg-dev autoconf-archive libsdl2-dev libglew-dev
-          sudo apt-get install mingw-w64 libz-mingw-w64-dev emudbg-mingw-w64-dev nsis
-
-      - name: Build
-        run: |
-          ./.github/scripts/build-mingw.sh
-          cp /tmp/build/mingw/setup-ngdevkit-gngeo-nightly.exe* .
-
-      - name: Upload NSIS installer
-        uses: actions/upload-artifact@v2
-        with:
-          name: nsis-artifact
-          path: |
-            setup-ngdevkit-gngeo-nightly.exe
-            setup-ngdevkit-gngeo-nightly.exe.sha256
-
   win:
     name: "Windows native MSYS2 build"
     runs-on: windows-latest
@@ -74,19 +38,19 @@ jobs:
       - name: Install MSYS2
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: UCRT64
           update: true
           install:
             git autoconf autoconf-archive automake make
-            mingw-w64-x86_64-gcc mingw-w64-x86_64-libtool
-            mingw-w64-x86_64-pkg-config mingw-w64-x86_64-SDL2
-            mingw-w64-x86_64-glew
+            mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-libtool
+            mingw-w64-ucrt-x86_64-pkg-config mingw-w64-ucrt-x86_64-SDL2
+            mingw-w64-ucrt-x86_64-glew
 
       - name: Install ngdevkit dependencies
         run: |
           echo -e "[ngdevkit]\nSigLevel = Optional TrustAll\nServer = https://dciabrin.net/msys2-ngdevkit/\$arch" >> /etc/pacman.conf
           pacman -Sy
-          pacman -S --noconfirm mingw-w64-x86_64-emudbg
+          pacman -S --noconfirm mingw-w64-ucrt-x86_64-emudbg
 
       - name: Build
         run: ./.github/scripts/build-msys2.sh
@@ -114,7 +78,7 @@ jobs:
   deploy_deb:
     name: "deb: trigger Launchpad rebuild"
     runs-on: ubuntu-latest
-    needs: [linux, wincross, win, macos]
+    needs: [linux, win, macos]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -127,7 +91,7 @@ jobs:
 
   deploy_rpm:
     name: "rpm: trigger COPR rebuild"
-    needs: [linux, wincross, win, macos]
+    needs: [linux, win, macos]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -152,7 +116,7 @@ jobs:
   deploy_brew:
     name: "brew: trigger bottle rebuild"
     runs-on: ubuntu-latest
-    needs: [linux, wincross, win, macos]
+    needs: [linux, win, macos]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -169,61 +133,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-  deploy_nsis:
-    name: "win: publish NSIS installer"
-    runs-on: ubuntu-latest
-    needs: [linux, wincross, win, macos]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Download a single artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: nsis-artifact
-
-      - name: Retrieve information from current commit
-        id: nsis_data
-        run: |
-          echo "::set-output name=tag::$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M' --format='nightly-%ad')"
-          echo "::set-output name=date::$(TZ=UTC git show --quiet --date='format-local:%Y-%m-%d %H:%M' --format='%ad')"
-          echo "::set-output name=body::$(git show --quiet --format='%s')"
-
-      - name: Create nightly NSIS installer release
-        id: nsis_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.nsis_data.outputs.tag }}
-          release_name: Nightly build - ${{ steps.nsis_data.outputs.date }}
-          body: Nightly build ${{ steps.nsis_data.outputs.body }}
-          draft: false
-          prerelease: true
-
-      - name: Upload nightly NSIS installer
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.nsis_release.outputs.upload_url }}
-          asset_path: setup-ngdevkit-gngeo-nightly.exe
-          asset_name: setup-ngdevkit-gngeo-nightly.exe
-          asset_content_type: application/vnd.microsoft.portable-executable
-
-      - name: Upload nightly NSIS installer SHA256
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.nsis_release.outputs.upload_url }}
-          asset_path: setup-ngdevkit-gngeo-nightly.exe.sha256
-          asset_name: setup-ngdevkit-gngeo-nightly.exe.sha256
-          asset_content_type: text/plain
-
   deploy_msys2:
     name: "msys2: trigger package rebuild"
-    needs: [linux, wincross, win, macos]
+    needs: [linux, win, macos]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -237,14 +149,14 @@ jobs:
           git config --global user.email '<>'
           git config --global url."https://api@github.com/".insteadOf "https://github.com/"
           git clone https://github.com/dciabrin/msys2-ngdevkit .ci/msys2-ngdevkit
-          .ci/msys2-ngdevkit/.ci/bump-project-nightly-build.sh ngdevkit-gngeo ngdevkit
+          .ci/msys2-ngdevkit/.ci/bump-project-nightly-build.sh --package ngdevkit-gngeo --branch ngdevkit --batch
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
   cleanup_tags:
     name: "Cleanup tags and artefacts"
     runs-on: ubuntu-latest
-    needs: [deploy_deb, deploy_rpm, deploy_brew, deploy_nsis, deploy_msys2]
+    needs: [deploy_deb, deploy_rpm, deploy_brew, deploy_msys2]
     steps:
       - name: Checkout
         uses: actions/checkout@v2

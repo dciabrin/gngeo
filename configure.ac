@@ -42,7 +42,7 @@ AC_SUBST(CC_FOR_BUILD)
 # MSYS2: set a default mingw-compatible compiler
 if test "x$enable_msys2" = xtrue ; then
    if test "x$CC" = x ; then
-      CC=/mingw64/bin/x86_64-w64-mingw32-gcc.exe
+      CC=${MINGW_PREFIX}/bin/x86_64-w64-mingw32-gcc.exe
    fi
 fi
 
@@ -120,10 +120,7 @@ if test "x$enable_msys2" = xtrue || test "x$enable_mingw" = xtrue ; then
    AC_SUBST(MINGW_STDIO_REALPATH)
 fi
 if test "x$enable_msys2" = xtrue ; then
-   case $target_cpu in
-      x86_64) PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/mingw64/lib/pkgconfig" ;;
-      *)      PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/mingw32/lib/pkgconfig" ;;
-   esac
+   PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$MINGW_PREFIX/lib/pkgconfig"
    export PKG_CONFIG_PATH
    if test "x$with_glew" != "xno" ; then
       if test -d "$with_glew"; then
