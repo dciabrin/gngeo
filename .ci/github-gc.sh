@@ -71,42 +71,12 @@ if [ -z "$COMMIT" ]; then
 fi
 CREDS=$USER:$GITHUB_TOKEN
 
+# There used to be github release for nightly tags. These releases
+# held NSIS binaries for the Windows installer. They are no longer
+# being built in CI and replaced by MSYS2 packages.
 
-# ----------------- garbage-collect releases and tags -----------------
+# ----------------- garbage-collect tags -----------------
 #
-echo "Downloading releases list from $REPO..."
-ret=$(curl -s -w "%{http_code}" -X GET -u $CREDS https://api.github.com/repos/$USER/$REPO/releases -o releases)
-check "downloading releases list" $ret
-
-# most recent release matching tag_name regex
-last_release=$(jq '. | map(select(.tag_name | test("'"$TAG_REGEX"'"))) | sort_by(.created_at) | reverse[0]' releases)
-commit=$(echo $last_release | jq -r '.target_commitish')
-tag_name=$(echo $last_release | jq -r '.tag_name')
-id=$(echo $last_release | jq -r '.id')
-
-if [ "$commit" != "$COMMIT" ]; then
-   error "Latest release matching '$TAG_REGEX' in $REPO doesn't point to commit '$COMMIT'. Aborting"
-fi
-
-echo "Latest matching release is associated to tag '$tag_name' and points to commit '$COMMIT', keeping it"
-
-# all releases to remove
-releases_rm=$(jq -r '.[] | select(.tag_name | test("'"$TAG_REGEX"'")) | select (.id != '"$id"') | .id' releases)
-if [ -n "$releases_rm" ]; then
-    echo "Deleting all the remaining releases matching '$TAG_REGEX'"
-else
-    echo "  (no old release detected)"
-fi
-for i in $releases_rm; do
-    tag_name_rm=$(jq -r '.[] | select (.id == '"$i"') | .tag_name' releases)
-    echo "  removing release $i pointing to tag $tag_name_rm"
-    if [ -z "$DRYRUN" ]; then
-        ret=$(curl -s -w "%{http_code}" -X DELETE -u $CREDS https://api.github.com/repos/$USER/$REPO/releases/$i)
-        check "removing release $i" $ret
-        sleep 0.5
-    fi
-done
-
 echo "Downloading tags list from $REPO..."
 ret=$(curl -s -w "%{http_code}" -X GET -u $CREDS https://api.github.com/repos/$USER/$REPO/git/refs/tags -o references)
 check "downloading tags list" $ret
