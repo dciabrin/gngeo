@@ -3053,7 +3053,7 @@ void YM2610Update_SoundTest(int p)
 }
 #endif
 
-void ym2610_mkstate(gzFile *gzf, int mode) {
+void ym2610_mkstate(gzFile gzf, int mode) {
 	int r;
 	/* Old save state version was buggy, tried to load it anyway
 	 * Thanks Robert for the fix

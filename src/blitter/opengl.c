@@ -403,7 +403,10 @@ void blitter_opengl_fullscreen() {
     if (fullscreen) {
         SDL_GetWindowDisplayMode(window, &mode);
     } else {
-        SDL_GetWindowSize(window, &conf.res_x, &conf.res_y);
+        int res_x, res_y;
+        SDL_GetWindowSize(window, &res_x, &res_y);
+        conf.res_x = (Uint16)res_x;
+        conf.res_y = (Uint16)res_y;
     }
     pglEnable(GL_TEXTURE_2D);
     pglViewport(0, 0, conf.res_x, conf.res_y);
