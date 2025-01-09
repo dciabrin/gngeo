@@ -342,13 +342,14 @@ AM_CONDITIONAL(USE_GLSL,[test x$ng_cv_use_glsl = xtrue])
 
 # Checks for header files.
 AC_HEADER_DIRENT
-AC_HEADER_STDC
+AC_CHECK_INCLUDES_DEFAULT
+
+
 AC_CHECK_HEADERS([errno.h limits.h malloc.h stddef.h stdlib.h string.h sys/time.h unistd.h libgen.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
-AC_HEADER_TIME
 AC_STRUCT_TM
 AC_C_BIGENDIAN
 
