@@ -290,6 +290,22 @@ pushdef([_AX_CHECK_GL_PROGRAM],
 # endif
 ]],[[glCreateProgram()]])])
 
+dnl fix m4 compile time checks in ax_check_gl.m4
+pushdef([_AX_CHECK_GL_MANUAL_LIBS_GENERIC], [
+  AS_IF([test -n "$GL_LIBS"],[], [
+    ax_check_gl_manual_libs_generic_extra_libs="$1"
+
+    _AX_CHECK_GL_SAVE_FLAGS([CFLAGS])
+    AC_SEARCH_LIBS([glBegin],[$ax_check_gl_manual_libs_generic_extra_libs], [
+                   ax_check_gl_lib_opengl="yes"
+                   break
+                   ])
+    AS_IF([test "X$ax_check_gl_lib_opengl"="Xyes"],
+          [GL_LIBS="${ac_cv_search_glBegin}"])
+    _AX_CHECK_GL_RESTORE_FLAGS([CFLAGS])
+ ])
+])
+
 AX_CHECK_GL
 AM_CONDITIONAL(USE_OPENGL,[test "X$no_gl" != "Xyes"])
 
