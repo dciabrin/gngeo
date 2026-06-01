@@ -280,6 +280,8 @@ pushdef([_AX_CHECK_GL_PROGRAM],
 # if defined(MINGW) || defined(__MINGW32__) || defined(__MINGW64__)
 #     include <GL/glew.h>
 # else
+#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
+#pragma GCC diagnostic ignored "-Werror=implicit-function-declaration"
 #   ifdef HAVE_GL_GL_H
 #     include <GL/gl.h>
 #   elif defined(HAVE_OPENGL_GL_H)
