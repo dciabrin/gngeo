@@ -95,3 +95,5 @@ endif
 video_i386.o : video_i386.inc
 video_i386.o screen_i386.o : %.o: %.asm
 	nasm -f elf -I $(srcdir)/ $< -o $@
+
+conf.o: DEFAULT_INCLUDES = -iquote . -I$(top_builddir)
