@@ -576,9 +576,9 @@ static int pbar_x;
 static Uint32 pbar_last_update;
 
 /*
- * Draw progress updates on the caller (main) thread. OpenGL contexts are
- * thread-affine, and dispatching screen_update() from the old worker thread
- * crashes with NVIDIA's GL implementation.
+ * Various OpenGL implementations limit the use of the OpenGL API to the
+ * thread that created the OpenGL context. Draw progress updates on the
+ * caller (main) thread.
  */
 static void pbar_render(void) {
 	SDL_Rect src_r = { 2, 0, gngeo_logo->w, gngeo_logo->h };
