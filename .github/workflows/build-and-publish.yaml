@@ -69,6 +69,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew tap dciabrin/ngdevkit
+          brew trust dciabrin/ngdevkit
           brew install emudbg automake autoconf-archive sdl2 glew
 
       - name: Build
