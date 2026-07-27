@@ -1,8 +1,12 @@
 name: Build and Test
 on:
+  workflow_dispatch:
+  pull_request:
   push:
     branches-ignore:
       - 'ngdevkit'
+    paths-ignore:
+      - 'README*.md'
 jobs:
   linux:
     name: "Linux build"
