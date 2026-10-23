@@ -11,6 +11,7 @@
 #include "conf.h"
 #include "emu.h"
 #include "memory.h"
+#include "roms.h"
 #include "gnutil.h"
 #include "messages.h"
 
@@ -403,6 +404,13 @@ int handle_event(void) {
 				screen_resize(event.window.data1, event.window.data2);
 				break;
 			case SDL_WINDOWEVENT_CLOSE:
+				/* exit() skips close_game(), so keep what it
+				   would have saved: an MVS game's backup RAM
+				   (high scores, settings) and the memory card. */
+				if (conf.game) {
+					save_nvram(conf.game);
+					save_memcard(conf.game);
+				}
 				exit(0);
 			}
 		}

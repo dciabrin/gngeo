@@ -81,5 +81,7 @@ char *dr_gno_romname(char *filename);
 int dr_open_gno(char *filename);
 int init_game(char *rom_name);
 int close_game(void);
+void save_nvram(char *name);
+void save_memcard(char *name);
 
 #endif
