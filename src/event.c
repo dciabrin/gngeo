@@ -39,6 +39,7 @@ static int get_mapid(char *butid) {
 	if (!strcmp(butid,"START")) return GN_START;
 	if (!strcmp(butid,"COIN")) return GN_SELECT_COIN;
 
+	if (!strcmp(butid,"RESET")) return GN_RESET;
 	if (!strcmp(butid,"MENU")) return GN_MENU_KEY;
 
 	if (!strcmp(butid,"HOTKEY1")) return GN_HOTKEY1;
@@ -478,6 +479,12 @@ int handle_event(void) {
 	&& (joy_state[0][GN_START] || joy_state[0][GN_SELECT_COIN]))
 		return 1;
 #endif
+
+	/* Consume the press once; holding the button must not reset every frame. */
+	if (joy_state[0][GN_RESET] || joy_state[1][GN_RESET]) {
+		joy_state[0][GN_RESET] = joy_state[1][GN_RESET] = 0;
+		cpu_68k_reset();
+	}
 
 	if(joy_state[0][GN_MENU_KEY]==1)
 		return 1;

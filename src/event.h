@@ -20,6 +20,7 @@ typedef enum {
 	GN_HOTKEY2,
 	GN_HOTKEY3,
 	GN_HOTKEY4,
+	GN_RESET, /* Emulator reset, separate from the cabinet coin input. */
 	GN_MAX_KEY,
 }GNGEO_BUTTON;
 
