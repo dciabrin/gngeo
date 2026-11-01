@@ -951,7 +951,7 @@ void generate(FILE *output, int topnibble)
 		OUT("\n");
 		OUT("  if (outdata_low > 0x09)\n");
 		OUT("    outdata_tmp+= 0x06;\n");
-		OUT("  if (outdata_tmp > 0x90) {\n");
+		OUT("  if (outdata_tmp > 0x99) {\n");
 		OUT("    outdata_tmp+= 0x60;\n");
 		if (flags && iib->flags.set & IIB_FLAG_C)
 		    OUT("    CFLAG = 1;\n");
