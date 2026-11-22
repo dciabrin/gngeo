@@ -111,7 +111,7 @@ if test "x$enable_win32" = xtrue ; then
 fi
 if test "x$enable_msys2" = xtrue || test "x$enable_mingw" = xtrue ; then
    AC_MSG_CHECKING([the location of stdio.h to override])
-   MINGW_STDIO_REALPATH=`echo "#include <stdio.h>" | $CC -xc -E - | sed -n 's/^#.*"\([^"]*stdio.h\)".*/\1/p' | sort -u`
+   MINGW_STDIO_REALPATH=`echo "#include <stdio.h>" | $CC -xc -E - | sed -n 's/^#.*"\([^"]*stdio.h\)".*/\1/p' | grep -F /stdio.h | sort -u`
    if test -f "$MINGW_STDIO_REALPATH"; then
       AC_MSG_RESULT($MINGW_STDIO_REALPATH)
    else
